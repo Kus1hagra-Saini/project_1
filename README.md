@@ -1,16 +1,74 @@
-# React + Vite
+# Community Student Marketplace
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+A modern marketplace platform for students to buy, sell, and share school items (books, uniforms, notes) with their community.
 
-Currently, two official plugins are available:
+## Features
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) (or [oxc](https://oxc.rs) when used in [rolldown-vite](https://vite.dev/guide/rolldown)) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+- 🎨 Modern, responsive UI with dark mode support
+- 🔍 Advanced filtering (category, price, location, school)
+- 📱 Mobile-friendly design
+- ⚡ Fast search functionality
+- 🎯 Real-time filtering
 
-## React Compiler
+## Tech Stack
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+- React 19
+- Vite
+- Tailwind CSS
+- Lucide React (icons)
 
-## Expanding the ESLint configuration
+## Setup Instructions
 
-If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and [`typescript-eslint`](https://typescript-eslint.io) in your project.
+### 1. Install Dependencies
+
+```bash
+npm install
+```
+
+### 2. Start Development Server
+
+```bash
+npm run dev
+```
+
+The app will run on `http://localhost:5173`
+
+## Project Structure
+
+```
+├── src/
+│   ├── components/          # React components
+│   │   ├── Navbar.jsx
+│   │   ├── Hero.jsx
+│   │   ├── ProductCard.jsx
+│   │   ├── ProductGrid.jsx
+│   │   ├── FilterSidebar.jsx
+│   │   └── FilterDrawer.jsx
+│   ├── data/
+│   │   └── mockItems.js     # Mock data
+│   └── App.jsx             # Main app component
+└── package.json
+```
+
+## Available Scripts
+
+- `npm run dev` - Start development server
+- `npm run build` - Build for production
+- `npm run preview` - Preview production build
+- `npm run lint` - Run ESLint
+
+## Deployment
+
+### Frontend (S3 + CloudFront)
+
+1. Build the frontend:
+   ```bash
+   npm run build
+   ```
+
+2. Upload `dist/` folder to S3 bucket
+3. Configure CloudFront distribution
+
+## License
+
+Private project

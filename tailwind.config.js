@@ -4,10 +4,24 @@ export default {
     "./index.html",
     "./src/**/*.{js,ts,jsx,tsx}",
   ],
+  darkMode: 'class',
   theme: {
     extend: {
       colors: {
-        community: {
+        primary: {
+          50: '#eff6ff',
+          100: '#dbeafe',
+          200: '#bfdbfe',
+          300: '#93c5fd',
+          400: '#60a5fa',
+          500: '#3b82f6',
+          600: '#2563eb',
+          700: '#1d4ed8',
+          800: '#1e40af',
+          900: '#1e3a8a',
+          950: '#172554',
+        },
+        accent: {
           50: '#f0f9ff',
           100: '#e0f2fe',
           200: '#bae6fd',
@@ -18,18 +32,7 @@ export default {
           700: '#0369a1',
           800: '#075985',
           900: '#0c4a6e',
-        },
-        sage: {
-          50: '#f6f7f4',
-          100: '#e8ebe3',
-          200: '#d4dac8',
-          300: '#b5c0a5',
-          400: '#96a382',
-          500: '#788667',
-          600: '#5e6b51',
-          700: '#4b5542',
-          800: '#3e4638',
-          900: '#353c31',
+          950: '#082f49',
         },
       },
       fontFamily: {
