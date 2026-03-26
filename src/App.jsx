@@ -13,13 +13,13 @@ import { useAuth } from './context/AuthContext';
 import { useToast } from './components/ui/ToastContainer';
 
 const DEFAULT_FILTERS = {
-  category: ['Books', 'Uniforms', 'Notes'],
+  category: ['Books', 'Uniforms', 'Notes', 'Other'],
   priceMode: null,
   radiusKm: 10,
   school: null,
 };
 
-const ITEM_CATEGORIES = ['Books', 'Uniforms', 'Notes'];
+const ITEM_CATEGORIES = ['Books', 'Uniforms', 'Notes', 'Other'];
 const PREDEFINED_SCHOOLS = [
   'None',
   'Delhi Public School',

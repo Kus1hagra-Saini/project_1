@@ -1,11 +1,12 @@
 import { useState, useMemo } from 'react';
-import { BookOpen, Shirt, FileText, MapPin, School, DollarSign } from 'lucide-react';
+import { BookOpen, Shirt, FileText, MapPin, School, DollarSign, Package } from 'lucide-react';
 import { SCHOOLS } from '../data/mockItems';
 
 const CATEGORIES = [
   { id: 'Books', label: 'Books', icon: BookOpen },
   { id: 'Uniforms', label: 'Uniforms', icon: Shirt },
   { id: 'Notes', label: 'Notes', icon: FileText },
+  { id: 'Other', label: 'Other', icon: Package },
 ];
 
 const RADIUS_OPTIONS = [5, 10, 20];
