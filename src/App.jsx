@@ -22,13 +22,14 @@ const DEFAULT_FILTERS = {
 const ITEM_CATEGORIES = ['Books', 'Uniforms', 'Notes', 'Other'];
 const PREDEFINED_SCHOOLS = [
   'None',
-  'Delhi Public School',
-  'Kendriya Vidyalaya',
-  'Ryan International',
-  'St. Xavier\'s',
-  'Springdales',
-  'The Shri Ram School',
-  'Vasant Valley',
+  'Campion School, Bhopal',
+  "St. Joseph's Co-ed School",
+  'Carmel Convent School',
+  'Sagar Public School',
+  'Delhi Public School, Bhopal',
+  'Christ Church School',
+  "St. Xavier's School",
+  'Billabong High International School',
   'Other'
 ];
 
