@@ -116,12 +116,10 @@ export default function App() {
   }), []);
 
   const fetchItems = useCallback(async () => {
-    const ownerId = user?.id;
-    if (!ownerId) { setItems([]); return; }
     setItemsLoading(true);
     setItemsError('');
     try {
-      const data = await listItems(ownerId);
+      const data = await listItems();
       const apiItems = Array.isArray(data?.items) ? data.items : [];
       setItems(apiItems.map(mapApiItemToUiItem));
     } catch (error) {
@@ -130,7 +128,7 @@ export default function App() {
     } finally {
       setItemsLoading(false);
     }
-  }, [mapApiItemToUiItem, user?.id]);
+  }, [mapApiItemToUiItem]);
 
   useEffect(() => {
     fetchItems();
