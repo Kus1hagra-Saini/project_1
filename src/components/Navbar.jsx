@@ -40,7 +40,7 @@ export default function Navbar({ onSearch, onMenuClick, user, onLoginClick, onLo
           {/* Logo */}
           <a href="/" className="flex items-center gap-2 shrink-0 group">
             <span className="flex items-center justify-center w-10 h-10 rounded-xl bg-primary-600 text-white font-bold text-lg shadow-md group-hover:shadow-lg transition-shadow">C</span>
-            <span className="font-semibold text-slate-800 dark:text-slate-100 hidden sm:inline text-lg">Community Marketplace</span>
+            <span className="font-semibold text-slate-800 dark:text-slate-100 hidden sm:inline text-lg">Scholars Connect</span>
           </a>
 
           {/* Global search */}

@@ -104,7 +104,7 @@ export default function App() {
     price: Number(item.price || 0),
     isDonation: Number(item.price || 0) === 0,
     condition: item.condition || 'Used',
-    school: item.school || 'Community Marketplace',
+    school: item.school || 'Scholars Connect',
     distanceMiles: Number(item.distanceMiles || 0),
     lat: item.lat ?? null,
     lng: item.lng ?? null,
