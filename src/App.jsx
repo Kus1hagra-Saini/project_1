@@ -230,7 +230,7 @@ export default function App() {
   const confirmDelete = useCallback(async () => {
     if (!user || !itemToDelete) return;
     try {
-      await deleteItemAPI(itemToDelete.id, user.id);
+      await deleteItemAPI(itemToDelete.id, itemToDelete.ownerId || user.id);
       setItems((prev) => prev.filter((i) => i.id !== itemToDelete.id));
       addToast(`Deleted "${itemToDelete.title}"`, 'success');
       setItemToDelete(null);
@@ -325,6 +325,8 @@ export default function App() {
                 userLng={user?.lng ?? null}
                 sortBy={sortBy}
                 onItemClick={setSelectedItem}
+                user={user}
+                onDelete={handleListingDeleteClick}
               />
               {itemsLoading && (
                 <p className="mt-4 text-sm text-slate-500 dark:text-slate-400">Loading latest items...</p>

@@ -1,4 +1,4 @@
-import { MapPin } from 'lucide-react';
+import { MapPin, Trash2 } from 'lucide-react';
 import Badge from './ui/Badge';
 
 /** Haversine formula — returns distance in km between two lat/lng points */
@@ -14,7 +14,9 @@ function haversineKm(lat1, lng1, lat2, lng2) {
   return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
 }
 
-export default function ProductCard({ item, userLat, userLng, onClick }) {
+export default function ProductCard({ item, userLat, userLng, onClick, user, onDelete }) {
+  const isAdmin = user?.username === 'kushagra';
+  const canDelete = isAdmin || (user?.id && user.id === item.ownerId);
   const priceLabel = item.isDonation ? 'Free' : `₹${item.price}`;
 
   // Compute distance: prefer real coords, fall back to distanceMiles
@@ -58,13 +60,21 @@ export default function ProductCard({ item, userLat, userLng, onClick }) {
           <h3 className="font-semibold text-lg text-slate-900 dark:text-slate-100 line-clamp-2 flex-1 min-w-0">
             {item.title}
           </h3>
-          <Badge
-            variant={item.isDonation ? 'success' : 'default'}
-            size="md"
-            className="shrink-0"
-          >
-            {priceLabel}
-          </Badge>
+          <div className="flex flex-col items-end gap-2 shrink-0">
+            <Badge variant={item.isDonation ? 'success' : 'default'} size="md">
+              {priceLabel}
+            </Badge>
+            {canDelete && (
+              <button
+                type="button"
+                onClick={(e) => { e.stopPropagation(); onDelete?.(item); }}
+                className="p-1.5 rounded-lg text-red-500 bg-red-50 hover:bg-red-100 dark:bg-red-900/20 dark:hover:bg-red-900/40 transition-colors shadow-sm"
+                title="Delete listing"
+              >
+                <Trash2 className="w-4 h-4" />
+              </button>
+            )}
+          </div>
         </div>
 
         <p className="text-sm text-slate-600 dark:text-slate-400 mb-3">{item.school}</p>

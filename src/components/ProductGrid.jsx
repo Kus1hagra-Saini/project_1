@@ -53,7 +53,7 @@ function sortItems(items, sortBy, userLat, userLng) {
   }
 }
 
-export default function ProductGrid({ items, filters, searchQuery, userLat, userLng, sortBy = 'newest', onItemClick }) {
+export default function ProductGrid({ items, filters, searchQuery, userLat, userLng, sortBy = 'newest', onItemClick, user, onDelete }) {
   const filtered = useMemo(() => filterItems(items, filters, userLat, userLng), [items, filters, userLat, userLng]);
 
   const searched = useMemo(() => {
@@ -92,6 +92,8 @@ export default function ProductGrid({ items, filters, searchQuery, userLat, user
           userLat={userLat}
           userLng={userLng}
           onClick={onItemClick}
+          user={user}
+          onDelete={onDelete}
         />
       ))}
     </div>
