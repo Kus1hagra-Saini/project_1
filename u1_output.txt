@@ -1,0 +1,13 @@
+Fetching items for owner: u1...
+Found 2 items for u1.
+
+ID: f056197f-78c2-4c58-858a-b4eae832c994
+Title: Physics TextBook Class 12th
+Desc: NCERT class 12th physics book in new condition(not used)
+Images: ["uploads/u1/01976ef3-83a1-47bc-a0e1-fb76413ca051.jpeg"]
+---
+ID: i1
+Title: Calculator for sale
+Desc: Casio scientific calculator, good condition.
+Images: ["uploads/u1/i1/main.jpg"]
+---

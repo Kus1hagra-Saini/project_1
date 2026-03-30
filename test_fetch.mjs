@@ -1,0 +1,46 @@
+import https from 'https';
+import fs from 'fs';
+
+const API_URL = 'https://f3knlmzmvg.execute-api.ap-south-1.amazonaws.com';
+
+async function fetchJson(url, options = {}) {
+  return new Promise((resolve, reject) => {
+    const req = https.request(url, options, (res) => {
+      let data = '';
+      res.on('data', chunk => data += chunk);
+      res.on('end', () => {
+        if (res.statusCode >= 200 && res.statusCode < 300) {
+          resolve(JSON.parse(data || '{}'));
+        } else {
+          reject(new Error(`HTTP ${res.statusCode}: ${data}`));
+        }
+      });
+    });
+    req.on('error', reject);
+    if (options.body) req.write(options.body);
+    req.end();
+  });
+}
+
+async function run() {
+  try {
+    const result = await fetchJson(`${API_URL}/items`, { method: 'GET' });
+    const items = result.items || [];
+    let output = `Found ${items.length} items.\n\n`;
+
+    for (const item of items) {
+       output += `Title: ${item.title}\n`;
+       output += `ImagesKeys: ${JSON.stringify(item.imageKeys || [])}\n`;
+       output += `imageUrl: ${item.imageUrl}\n`;
+       output += `imageUrls: ${JSON.stringify(item.imageUrls || [])}\n`;
+       output += '---\n';
+    }
+
+    fs.writeFileSync('test_fetch_output.txt', output, 'utf8');
+
+  } catch (err) {
+    console.error(`Error:`, err.message);
+  }
+}
+
+run();
