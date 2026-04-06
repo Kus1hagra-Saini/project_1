@@ -2,7 +2,7 @@ import { useState, useCallback } from 'react';
 import { LogIn, UserPlus, MapPin, Loader2, CheckCircle2, AlertCircle, Eye, EyeOff, Key } from 'lucide-react';
 import Modal from './ui/Modal';
 import { useAuth } from '../context/AuthContext';
-import { signIn, signUp, confirmSignUp, fetchUserAttributes, getCurrentUser } from 'aws-amplify/auth';
+import { signIn, signUp, confirmSignUp, fetchUserAttributes, getCurrentUser, signOut } from 'aws-amplify/auth';
 
 /* ── small reusable field ─────────────────────────────────────────── */
 function Field({ label, id, type = 'text', value, onChange, placeholder, required, hint, rightSlot }) {
@@ -120,6 +120,7 @@ export default function LoginModal({ isOpen, onClose }) {
     if (!siPassword) { setError('Password is required.'); return; }
     setLoading(true);
     try {
+      await signOut().catch(() => {}); // Clear dirty state
       const { isSignedIn, nextStep } = await signIn({ username: siUsername.trim(), password: siPassword });
       
       if (nextStep?.signInStep === 'CONFIRM_SIGN_UP') {
@@ -153,6 +154,7 @@ export default function LoginModal({ isOpen, onClose }) {
     if (suPassword !== suConfirm) { setError('Passwords do not match.'); return; }
     setLoading(true);
     try {
+      await signOut().catch(() => {}); // Clear dirty state
       const { nextStep } = await signUp({
         username: suUsername.trim(),
         password: suPassword,
