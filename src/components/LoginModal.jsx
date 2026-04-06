@@ -1,8 +1,8 @@
 import { useState, useCallback } from 'react';
-import { LogIn, UserPlus, MapPin, Loader2, CheckCircle2, AlertCircle, Eye, EyeOff } from 'lucide-react';
+import { LogIn, UserPlus, MapPin, Loader2, CheckCircle2, AlertCircle, Eye, EyeOff, Key } from 'lucide-react';
 import Modal from './ui/Modal';
 import { useAuth } from '../context/AuthContext';
-import { registerUser, loginUser } from '../lib/api';
+import { signIn, signUp, confirmSignUp, fetchUserAttributes, getCurrentUser } from 'aws-amplify/auth';
 
 /* ── small reusable field ─────────────────────────────────────────── */
 function Field({ label, id, type = 'text', value, onChange, placeholder, required, hint, rightSlot }) {
@@ -71,7 +71,7 @@ function LocationButton({ locState, coords, onRequest }) {
 /* ── main modal ───────────────────────────────────────────────────── */
 export default function LoginModal({ isOpen, onClose }) {
   const { login } = useAuth();
-  const [tab, setTab] = useState('signin'); // 'signin' | 'signup'
+  const [tab, setTab] = useState('signin'); // 'signin' | 'signup' | 'confirm'
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
 
@@ -83,11 +83,15 @@ export default function LoginModal({ isOpen, onClose }) {
   // Sign-up fields
   const [suName, setSuName] = useState('');
   const [suUsername, setSuUsername] = useState('');
+  const [suEmail, setSuEmail] = useState('');
   const [suPassword, setSuPassword] = useState('');
   const [suConfirm, setSuConfirm] = useState('');
   const [suShowPw, setSuShowPw] = useState(false);
   const [locState, setLocState] = useState('idle');
   const [coords, setCoords] = useState({ lat: null, lng: null });
+
+  // Confirm field
+  const [confirmCode, setConfirmCode] = useState('');
 
   const requestLocation = useCallback(() => {
     if (!navigator.geolocation) { setLocState('denied'); return; }
@@ -101,7 +105,8 @@ export default function LoginModal({ isOpen, onClose }) {
 
   const resetAll = useCallback(() => {
     setSiUsername(''); setSiPassword(''); setSiShowPw(false);
-    setSuName(''); setSuUsername(''); setSuPassword(''); setSuConfirm(''); setSuShowPw(false);
+    setSuName(''); setSuUsername(''); setSuEmail(''); setSuPassword(''); setSuConfirm(''); setSuShowPw(false);
+    setConfirmCode(''); setTab('signin');
     setLocState('idle'); setCoords({ lat: null, lng: null });
     setError(''); setLoading(false);
   }, []);
@@ -115,9 +120,22 @@ export default function LoginModal({ isOpen, onClose }) {
     if (!siPassword) { setError('Password is required.'); return; }
     setLoading(true);
     try {
-      const data = await loginUser({ username: siUsername.trim(), password: siPassword });
-      login(data);
-      handleClose();
+      const { isSignedIn, nextStep } = await signIn({ username: siUsername.trim(), password: siPassword });
+      
+      if (nextStep?.signInStep === 'CONFIRM_SIGN_UP') {
+        // Rare edge case: they signed up but didn't confirm yet
+        setSuUsername(siUsername.trim());
+        setSuPassword(siPassword);
+        setTab('confirm');
+        return;
+      }
+      
+      if (isSignedIn) {
+        const { username, userId } = await getCurrentUser();
+        const attrs = await fetchUserAttributes();
+        login({ id: userId, username, name: attrs.name || username, email: attrs.email });
+        handleClose();
+      }
     } catch (err) {
       setError(err.message || 'Login failed.');
     } finally {
@@ -130,55 +148,93 @@ export default function LoginModal({ isOpen, onClose }) {
     setError('');
     if (!suName.trim()) { setError('Display name is required.'); return; }
     if (!suUsername.trim()) { setError('Username is required.'); return; }
+    if (!suEmail.trim()) { setError('Email is required.'); return; }
     if (suPassword.length < 6) { setError('Password must be at least 6 characters.'); return; }
     if (suPassword !== suConfirm) { setError('Passwords do not match.'); return; }
     setLoading(true);
     try {
-      const data = await registerUser({
-        name: suName.trim(),
+      const { nextStep } = await signUp({
         username: suUsername.trim(),
         password: suPassword,
-        lat: coords.lat,
-        lng: coords.lng,
+        options: {
+          userAttributes: {
+            email: suEmail.trim(),
+            name: suName.trim(),
+          },
+        }
       });
-      login(data);
-      handleClose();
+      if (nextStep.signUpStep === 'CONFIRM_SIGN_UP') {
+        setTab('confirm');
+      } else {
+        // If auto-confirmed
+        await signIn({ username: suUsername.trim(), password: suPassword });
+        const { username, userId } = await getCurrentUser();
+        const attrs = await fetchUserAttributes();
+        login({ id: userId, username, name: attrs.name || username, email: attrs.email });
+        handleClose();
+      }
     } catch (err) {
       setError(err.message || 'Registration failed.');
     } finally {
       setLoading(false);
     }
-  }, [suName, suUsername, suPassword, suConfirm, coords, login, handleClose]);
+  }, [suName, suUsername, suEmail, suPassword, suConfirm, login, handleClose]);
+
+  const handleConfirm = useCallback(async (e) => {
+    e.preventDefault();
+    setError('');
+    if (!confirmCode.trim()) { setError('Code is required.'); return; }
+    setLoading(true);
+    try {
+      const { isSignUpComplete } = await confirmSignUp({
+        username: suUsername.trim(),
+        confirmationCode: confirmCode.trim()
+      });
+      if (isSignUpComplete) {
+        await signIn({ username: suUsername.trim(), password: suPassword });
+        const { username, userId } = await getCurrentUser();
+        const attrs = await fetchUserAttributes();
+        login({ id: userId, username, name: attrs.name || username, email: attrs.email });
+        handleClose();
+      }
+    } catch (err) {
+      setError(err.message || 'Confirmation failed.');
+    } finally {
+      setLoading(false);
+    }
+  }, [suUsername, confirmCode, suPassword, login, handleClose]);
 
   return (
     <Modal isOpen={isOpen} onClose={handleClose} title="" size="sm" showCloseButton={false}>
       {/* Tab header */}
-      <div className="-mt-2 mb-5">
-        <div className="flex rounded-xl overflow-hidden border border-slate-200 dark:border-slate-700">
-          <button
-            type="button"
-            onClick={() => { setTab('signin'); setError(''); }}
-            className={`flex-1 flex items-center justify-center gap-2 py-2.5 text-sm font-semibold transition-colors ${
-              tab === 'signin'
-                ? 'bg-primary-600 text-white'
-                : 'bg-white dark:bg-slate-800 text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-700'
-            }`}
-          >
-            <LogIn className="w-4 h-4" /> Sign In
-          </button>
-          <button
-            type="button"
-            onClick={() => { setTab('signup'); setError(''); }}
-            className={`flex-1 flex items-center justify-center gap-2 py-2.5 text-sm font-semibold transition-colors ${
-              tab === 'signup'
-                ? 'bg-primary-600 text-white'
-                : 'bg-white dark:bg-slate-800 text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-700'
-            }`}
-          >
-            <UserPlus className="w-4 h-4" /> Sign Up
-          </button>
+      {tab !== 'confirm' && (
+        <div className="-mt-2 mb-5">
+          <div className="flex rounded-xl overflow-hidden border border-slate-200 dark:border-slate-700">
+            <button
+              type="button"
+              onClick={() => { setTab('signin'); setError(''); }}
+              className={`flex-1 flex items-center justify-center gap-2 py-2.5 text-sm font-semibold transition-colors ${
+                tab === 'signin'
+                  ? 'bg-primary-600 text-white'
+                  : 'bg-white dark:bg-slate-800 text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-700'
+              }`}
+            >
+              <LogIn className="w-4 h-4" /> Sign In
+            </button>
+            <button
+              type="button"
+              onClick={() => { setTab('signup'); setError(''); }}
+              className={`flex-1 flex items-center justify-center gap-2 py-2.5 text-sm font-semibold transition-colors ${
+                tab === 'signup'
+                  ? 'bg-primary-600 text-white'
+                  : 'bg-white dark:bg-slate-800 text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-700'
+              }`}
+            >
+              <UserPlus className="w-4 h-4" /> Sign Up
+            </button>
+          </div>
         </div>
-      </div>
+      )}
 
       {/* ── Sign In ──────────────────────────────────────────────────── */}
       {tab === 'signin' && (
@@ -233,6 +289,11 @@ export default function LoginModal({ isOpen, onClose }) {
             hint="Lowercase only, no spaces"
           />
           <Field
+            id="su-email" label="Email" type="email" value={suEmail}
+            onChange={(e) => setSuEmail(e.target.value)}
+            placeholder="your@email.com" required
+          />
+          <Field
             id="su-password" label="Password" type={suShowPw ? 'text' : 'password'}
             value={suPassword} onChange={(e) => setSuPassword(e.target.value)}
             placeholder="Min. 6 characters" required
@@ -265,6 +326,32 @@ export default function LoginModal({ isOpen, onClose }) {
             <button type="button" onClick={() => { setTab('signin'); setError(''); }}
               className="text-primary-500 hover:underline font-medium">Sign in</button>
           </p>
+        </form>
+      )}
+
+      {/* ── Confirm ──────────────────────────────────────────────────── */}
+      {tab === 'confirm' && (
+        <form onSubmit={handleConfirm} className="space-y-4">
+          <div className="text-center text-sm text-slate-600 dark:text-slate-300 mb-2">
+            We sent a verification code to your email. Enter it below to complete registration.
+          </div>
+          <Field
+            id="co-code" label="Verification Code" value={confirmCode}
+            onChange={(e) => setConfirmCode(e.target.value.replace(/\D/g, ''))}
+            placeholder="123456" required
+          />
+          {error && <p className="text-sm text-red-500 dark:text-red-400">{error}</p>}
+          <div className="flex gap-3 pt-1">
+            <button type="button" onClick={() => { setTab('signup'); setError(''); }}
+              className="flex-1 px-4 py-2.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-200 text-sm font-medium hover:bg-slate-50 dark:hover:bg-slate-700 transition-colors">
+              Back
+            </button>
+            <button type="submit" disabled={loading}
+              className="flex-1 flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl bg-primary-600 hover:bg-primary-700 text-white text-sm font-semibold transition-colors disabled:opacity-60">
+              {loading ? <Loader2 className="w-4 h-4 animate-spin" /> : <Key className="w-4 h-4" />}
+              {loading ? 'Verifying…' : 'Verify'}
+            </button>
+          </div>
         </form>
       )}
     </Modal>
