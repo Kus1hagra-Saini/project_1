@@ -258,9 +258,9 @@ export default function LoginModal({ isOpen, onClose }) {
       {tab === 'signin' && (
         <form onSubmit={handleSignIn} className="space-y-4">
           <Field
-            id="si-username" label="Username" value={siUsername}
+            id="si-username" label="Username or Email" value={siUsername}
             onChange={(e) => setSiUsername(e.target.value)}
-            placeholder="your_username" required
+            placeholder="username or user@email.com" required
           />
           <Field
             id="si-password" label="Password" type={siShowPw ? 'text' : 'password'}
@@ -314,7 +314,7 @@ export default function LoginModal({ isOpen, onClose }) {
           <Field
             id="su-password" label="Password" type={suShowPw ? 'text' : 'password'}
             value={suPassword} onChange={(e) => setSuPassword(e.target.value)}
-            placeholder="Min. 6 characters" required
+            placeholder="Min. 8 chars (Upper, lower, & number)" required
             rightSlot={
               <button type="button" onClick={() => setSuShowPw((v) => !v)} className="text-slate-400 hover:text-slate-600 dark:hover:text-slate-200">
                 {suShowPw ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
