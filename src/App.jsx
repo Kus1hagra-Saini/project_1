@@ -168,8 +168,20 @@ export default function App() {
     setIsSubmittingListing(true);
     try {
       const title = form.title.trim();
+      const description = form.description.trim();
+      
       if (!title) throw new Error('Title is required');
+      if (title.length > 100) throw new Error('Title must be 100 characters or less.');
+      if (description.length > 2000) throw new Error('Description must be 2000 characters or less.');
+      
       if (!ITEM_CATEGORIES.includes(form.category)) throw new Error('Invalid category');
+      
+      const price = Number(form.price || 0);
+      if (isNaN(price)) throw new Error('Price must be a valid number.');
+      if (price < 0) throw new Error('Price cannot be negative.');
+      if (price > 1000000) throw new Error('Price is exceptionally high. Please enter a reasonable amount.');
+
+      if (selectedPhotos.length > 5) throw new Error('You can only upload up to 5 photos per listing.');
 
       const imageKeys = [];
       for (const file of selectedPhotos) {

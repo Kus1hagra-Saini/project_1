@@ -147,11 +147,27 @@ export default function LoginModal({ isOpen, onClose }) {
   const handleSignUp = useCallback(async (e) => {
     e.preventDefault();
     setError('');
+    
+    // Validate Display Name (only alphabet and spaces)
     if (!suName.trim()) { setError('Display name is required.'); return; }
+    if (!/^[a-zA-Z\s]+$/.test(suName)) { setError('Display name can only contain letters and spaces.'); return; }
+    
+    // Validate Username
     if (!suUsername.trim()) { setError('Username is required.'); return; }
+    if (!/^[a-z0-9_]+$/.test(suUsername)) { setError('Username can only contain lowercase letters, numbers, and underscores.'); return; }
+    
+    // Validate Email
     if (!suEmail.trim()) { setError('Email is required.'); return; }
-    if (suPassword.length < 6) { setError('Password must be at least 6 characters.'); return; }
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(suEmail.trim())) { setError('Please enter a valid email address.'); return; }
+    
+    // Validate Password
+    if (suPassword.length < 8) { setError('Password must be at least 8 characters long.'); return; }
+    if (!/[A-Z]/.test(suPassword)) { setError('Password must contain at least one uppercase letter.'); return; }
+    if (!/[a-z]/.test(suPassword)) { setError('Password must contain at least one lowercase letter.'); return; }
+    if (!/[0-9]/.test(suPassword)) { setError('Password must contain at least one number.'); return; }
+    
     if (suPassword !== suConfirm) { setError('Passwords do not match.'); return; }
+    
     setLoading(true);
     try {
       await signOut().catch(() => {}); // Clear dirty state
