@@ -15,7 +15,7 @@ function haversineKm(lat1, lng1, lat2, lng2) {
 }
 
 export default function ProductCard({ item, userLat, userLng, onClick, user, onDelete }) {
-  const isAdmin = user?.username === 'kushagra';
+  const isAdmin = user?.username === 'kushagra' || user?.email === 'kushagra2832004@gmail.com';
   const canDelete = isAdmin || (user?.id && user.id === item.ownerId);
   const priceLabel = item.isDonation ? 'Free' : `₹${item.price}`;
 
